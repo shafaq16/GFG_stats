@@ -1,54 +1,43 @@
-//-----------------TLE-----------------
-// class Solution {
-//   public:
-//     vector<int> prefixSum2D(vector<vector<int>> &mat, vector<vector<int>> &q) {
-//         // code here
-        
-//         vector<int> ans;
-//         for(int i = 0; i<q.size() ; i++){
-//             int sum = 0;
-//             int n = q[i][2];
-//             int m = q[i][3];
-//             for(int j = q[i][0]; j<=n ; j++){
-//                 for(int k = q[i][1]; k<=m; k++){
-//                     sum += mat[j][k];
-//                 }
-//             }
-//             ans.push_back(sum);
-//         }
-//         return ans;
-//     }
-// };
-
 class Solution {
-public:
-    vector<int> prefixSum2D(vector<vector<int>> &mat, vector<vector<int>> &q) {
-        int n = mat.size(), m = mat[0].size();
+  public:
+    vector<int> prefixSum2D(vector<vector<int>> &mat, vector<vector<int>> &queries) {
+        int n = mat.size();
+        int m = mat[0].size();
         
-        // Build 2D prefix sum array
-        vector<vector<long long>> pref(n+1, vector<long long>(m+1, 0));
+        // Create prefix sum matrix
+        vector<vector<int>> pre(n, vector<int>(m, 0));
         
-        for(int i = 1; i <= n; i++){
-            for(int j = 1; j <= m; j++){
-                pref[i][j] = pref[i-1][j] + pref[i][j-1]
-                             - pref[i-1][j-1] + mat[i-1][j-1];
+        for(int i = 0; i < n; i++) {
+            for(int j = 0; j < m; j++) {
+                pre[i][j] = mat[i][j];
+                
+                if(i > 0)
+                    pre[i][j] += pre[i - 1][j];
+                if(j > 0)
+                    pre[i][j] += pre[i][j - 1];
+                if(i > 0 && j > 0)
+                    pre[i][j] -= pre[i - 1][j - 1];
             }
         }
         
         vector<int> ans;
-
-        for(auto &qr : q){
-            int r1 = qr[0], c1 = qr[1];
-            int r2 = qr[2], c2 = qr[3];
+        
+        // Process each query
+        for(auto &q : queries) {
+            int r1 = q[0], c1 = q[1], r2 = q[2], c2 = q[3];
             
-            long long sum = pref[r2+1][c2+1]
-                          - pref[r1][c2+1]
-                          - pref[r2+1][c1]
-                          + pref[r1][c1];
+            int sum = pre[r2][c2];
+            
+            if(r1 > 0)
+                sum -= pre[r1 - 1][c2];
+            if(c1 > 0)
+                sum -= pre[r2][c1 - 1];
+            if(r1 > 0 && c1 > 0)
+                sum += pre[r1 - 1][c1 - 1];
             
             ans.push_back(sum);
         }
+        
         return ans;
     }
 };
-
